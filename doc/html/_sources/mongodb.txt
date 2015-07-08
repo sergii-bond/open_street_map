@@ -4,7 +4,6 @@ Overview of the Data
 
 * Size of the file *kyiv_ukraine.osm* : 234 MB
 * Number of unique users : 1392
-..    The following query was used:
 
     .. code-block:: python
 
@@ -17,7 +16,6 @@ Overview of the Data
 
 
 * Number of nodes : 1101493
-..    The following query was used:
 
     .. code-block:: python
 
@@ -38,8 +36,6 @@ Overview of the Data
                     {"$limit" : 1}]
 
         db.kyiv_map.aggregate(pipeline)
-
-.. db.kyiv_map.createIndex( { "pos": "2d" } )
 
 * List of available amenities: 
 

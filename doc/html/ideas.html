@@ -52,32 +52,120 @@
 <ul>
 <li><dl class="first docutils">
 <dt>Find more information about fields. For instance:</dt>
+<dd><ul class="first last">
+<li><p class="first">information about <em>addr:interpolation</em> field can be found <a class="reference external" href="http://wiki.openstreetmap.org/wiki/Addresses#Using_interpolation">here</a>.</p>
+</li>
+<li><p class="first">see how <em>addr:interpolation_1</em>  can interpreted.</p>
+</li>
+<li><p class="first">understand what does <em>addr:street_1</em> designate.</p>
+</li>
+<li><dl class="first docutils">
+<dt><em>Possible issues</em>:</dt>
 <dd><ul class="first last simple">
-<li>information about <em>addr:interpolation</em> field can be found <a class="reference external" href="http://wiki.openstreetmap.org/wiki/Addresses#Using_interpolation">here</a>.</li>
-<li>see how <em>addr:interpolation_1</em>  can interpreted.</li>
-<li>understand what does <em>addr:street_1</em> designates.</li>
+<li>Not all information can be found online</li>
+<li>Information found online or intuition may be different from the actual meaning by a user</li>
+<li>Some fields can be input by a user mistakenly and have no relation to the node</li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><p class="first">Resolve entities. It is likely several fields in the current solution mean the same thing, for example, <em>shop</em>, <em>shop_1</em> and <em>shop_2</em>.</p>
+</ul>
+</dd>
+</dl>
 </li>
-<li><p class="first">Process other unique keys that have one or more columns (:) in them, convert them to a better schema.</p>
+<li><dl class="first docutils">
+<dt>Resolve entities. It is likely several fields in the current solution mean the same thing, for example, <em>shop</em>, <em>shop_1</em> and <em>shop_2</em>.</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>Possible issues</em>:</dt>
+<dd><ul class="first last simple">
+<li>As the dataset increases, manual approach is tedious. Machine learning techniques can be applied to learns from a user feedback - expensive to implement in terms of resources and time.</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Process other unique keys that have one or more columns (:) inside, convert them to a better schema.</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>Possible issues</em>:</dt>
+<dd><ul class="first last simple">
+<li>Lack of consistency: for example, in one case a field is <em>name:uk</em> and in another can be <em>name:ukr</em>.</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
 </li>
 <li><dl class="first docutils">
 <dt>Audit the values</dt>
+<dd><ul class="first last">
+<li><p class="first">See whether any values contain information that can be extracted as a new field (we have seen this in wikipedia&#8217;s value already). Clean up if the pattern can be discovered.</p>
+</li>
+<li><p class="first">Check consistency, for example of units.</p>
+</li>
+<li><dl class="first docutils">
+<dt><em>Possible issues</em>:</dt>
 <dd><ul class="first last simple">
-<li>See whether any values contain information that can be extracted as a new field (we have seen this in wikipedia&#8217;s value already). Clean up if the pattern can be discovered.</li>
-<li>Check consistency, for example of units.</li>
+<li>Because the data includes languages other than English, there may be issues with matching using regular expressions. Before making a regex for unicode, one needs to understand well the differences compared to ascii regex.</li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><p class="first">Process documents of type <em>relations</em> to get more data about the city into the database</p>
+</ul>
+</dd>
+</dl>
 </li>
-<li><p class="first">After the better schema is in place and the understanding of the fields meaning is clear, more sophisticated queries can be run to answer many questions about the city.</p>
+<li><dl class="first docutils">
+<dt>Process documents of type <em>relations</em> to get more data about the city into the database.</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>Possible issues</em>:</dt>
+<dd><ul class="first last simple">
+<li><em>relation</em> may include a reference to a node that is not in the current dataset.</li>
+</ul>
+</dd>
+</dl>
 </li>
-<li><p class="first">Provisions should be made on updating the database periodically with new data coming from Open Street Map. If possible, find a way to do it incrementally, without a need to completely write the data from scratch.</p>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>After the better schema is in place and the understanding of the fields meaning is clear, more sophisticated queries can be run to answer many questions about the city.</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>Possible issues</em>:</dt>
+<dd><ul class="first last simple">
+<li>Some documents will not have a key/value pair for a quieried field. If there is no key/value, it doesn&#8217;t necessarily mean it is not applicable for the document. A user may not have specified it. The results can be biased.</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Provisions should be made on updating the database periodically with new data coming from Open Street Map. If possible, find a way to do it incrementally, without a need to completely write the data from scratch.</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>Possible issues</em>:</dt>
+<dd><ul class="first last simple">
+<li>Implementation can be costly</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
 </li>
 </ul>
 </div>
