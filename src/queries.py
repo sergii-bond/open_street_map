@@ -4,9 +4,10 @@ Runs queries
 """
 
 import pprint
+import pymongo
+from pymongo import MongoClient
 
 def get_db(db_name):
-    from pymongo import MongoClient
     client = MongoClient('localhost:27017')
     db = client[db_name]
     return db
@@ -47,6 +48,63 @@ if __name__ == '__main__':
                 {"$group" : {"_id" : "null",
                              "count" : {"$sum" : 1 }}},
                 {"$limit" : 1}]
+    result = aggregate(db, pipeline)
+    print_result(result)
+
+    # Find what's near location where I lived
+    #print "What's near the place I lived:"
+    #db.kyiv_map.ensure_index([("pos", pymongo.GEO2D)])
+    #result = db.kyiv_map.aggregate([{ 
+    #            "$geoNear" : {
+    #                #"near" : { "type" : "Point", "coordinates" : [50.46117, 30.482912]},
+    #                "near" : { "coordinates" : [50.46117, 30.482912]},
+    #                "distanceField" : "distance.calculated",
+    #                "maxDistance" : 1000,
+    #                #"query" : {"type" : "node"},
+    #                "limit" : 5
+    #            }      
+    #           }]
+    #result = db.kyiv_map.find({ 
+    #        "pos" : { 
+    #            "$near" : {
+    #                "$geometry" : {
+    #                    "type" : "Point",
+    #                    "coordinates" : [50.46117, 30.482912]
+    #                    },
+    #                "$maxDistance" : 1000,
+    #            }
+    #        }
+    #})
+    #result = db.kyiv_map.find({ 
+    #        "pos" : { 
+    #            "$near" : [50.46117, 30.482912]
+    #  #          "$maxDistance" : 1000
+    #            },
+    #        "amenity" : "bank" 
+    #        })
+    #result = db.kyiv_map.find({ "pos" : { "$near" : [50.46117, 30.482912] }
+    #    }).count()
+    #print_result(result)
+
+    # Return the list of amenities
+    print "List of available amenities: "
+    pipeline = [{"$match" : {"amenity" : {"$exists" : 1}}},
+                {"$group" : {"_id" : "$amenity"}},
+                {"$sort" : {"_id" : 1}},
+                ]
+    result = aggregate(db, pipeline)
+    l = []
+    for item in result:
+        l.append(item["_id"])
+    print l
+
+    # Counts the number of unique banks
+    print "Number of unique banks:"
+    pipeline = [{"$match" : {"amenity" : "bank"}},
+                {"$group" : {"_id" : "$name"}},
+                {"$group" : {"_id" : "null",
+                             "count" : {"$sum" : 1 }}},
+                ]
     result = aggregate(db, pipeline)
     print_result(result)
 

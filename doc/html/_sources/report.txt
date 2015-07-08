@@ -1,9 +1,11 @@
+Analysis and results
+=============================
 
 Problems encountered in the map
 -------------------------------------
 
-Audit of tags
-===================
+Audit
++++++++++++++++++++++++++++++++++++++
 
 First we examine the existing tags and their quantity. For this purpose, *mapparser.py* code was written. Its output is below.
 
@@ -21,9 +23,6 @@ First we examine the existing tags and their quantity. For this purpose, *mappar
 
 From this output we see that no unusual nodes are present. There is more than 1 million nodes in the map. However fewer than a half is tagged. 
 There are around 5000 relations, but In this project we ignore them.
-
-Audit of keys in tags
-=========================
 
 Next we want to evaluate the keys of all *tag* elements inside *node* or *way*. 
 In the beginning we just take a look at all tag's keys to get a feeling of what to expect further. 
@@ -126,10 +125,25 @@ There is a hint here, "Дніпро" is a river. According to Wikipedia, CEMT ca
 
 Similarly we can investigate other fields and see whether any kind of transformation is needed.
 
-Transformations of the schema
-=============================
 
-Here is a list of suggested transformations for the chosen fields:
+.. ==== =======================================================     =============================================================
+.. .     Tag's key                                                  Resulting schema
+.. ==== =======================================================     =============================================================
+.. .     <tag k="ISO3166-1:alpha2" v="UA"/>  |br|                   ISO3166-1 : { alpha2 : "UA", |br|
+..       <tag k="ISO3166-1:alpha3" v="UKR"/>    |br|                              alpha3 : "UKR", |br|
+..       <tag k="ISO3166-1:numeric" v="804"/>   |br|                              numeric : 804 }  
+.. 
+.. .     <tag k="abandoned:railway" v="platform"/> |br|             abandoned : "yes" |br|
+..       <tag k="abandoned:public_transport" v="platform"/>         railway : "platform" |br|
+..                                                                  public_transport : platform |br|
+.. 
+.. .     <tag k="addr:street" v="Верховної Ради бульвар"/> |br|         address : { street : "Верховної Ради бульвар", |br|         
+..       <tag k="addr:postcode" v="02100"/>                |br|                     postcode : 02100, |br|
+..       <tag k="addr:housenumber" v="7"/>                 |br|                     housenumber : 7 }
+.. 
+.. ==== =======================================================     =============================================================
+
+Here is a list of suggested transformations:
 
 * CEMT
     Convert to *cemt*
@@ -341,10 +355,8 @@ Here is a list of suggested transformations for the chosen fields:
         else, we assume a value v contains a semicolon and use a word before semicolon as a key, and the words after a semicolon as a value. 
 
 
-Audit and fixing of values
-===========================
 
-We choose to audit *addr:street* and *addr:street:en* values, that correspond to a native Ukrainian street name and to its English translation.
+Next we audit *addr:street* and *addr:street:en* values, that correspond to a native Ukrainian street name and to its English translation.
 The last word in a value is expected to be one of the following, depending on the language:
 
 .. code-block:: python
@@ -445,14 +457,12 @@ As the result, the fixed street names are:
     вул. Сагайдачного =>  Сагайдачного вулиця
     вул. Григорія Сковороди =>  Григорія Сковороди вулиця
 
-Inserting into MongoDB
-==============================
+Overview of the Data
+-------------------------------------
 
-The following code snippet from *data.py* inserts a node into MongoDB right after its processing:
+Other ideas about the datasets
+-------------------------------------
 
-.. code-block:: python
-
-    for _, element in ET.iterparse(file_in):
-        el = shape_element(element)
-        if el:
-            db.kyiv_map.insert(el)
+* Find more details about *addr:interpolation* field `here <http://wiki.openstreetmap.org/wiki/Addresses#Using_interpolation>`_. 
+  See how *addr:interpolation_1*  can interpreted.
+* Understand what does *addr:street_1* designates

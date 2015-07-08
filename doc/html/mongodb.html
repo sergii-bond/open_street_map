@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Overview of the Data &mdash; Open Street Map Project</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Open Street Map Project" href="index.html" />
+    <link rel="next" title="Other ideas about the datasets" href="ideas.html" />
+    <link rel="prev" title="Problems encountered in the map" href="audit.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>Open Street Map Project</span></a></h1>
+        <h2 class="heading"><span>Overview of the Data</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="audit.html">Problems encountered in the map</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="ideas.html">Other ideas about the datasets</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="overview-of-the-data">
+<h1>Overview of the Data<a class="headerlink" href="#overview-of-the-data" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Size of the file <em>kyiv_ukraine.osm</em> : 234 MB</li>
+<li>Number of unique users : 1392</li>
+</ul>
+<ul class="simple">
+<li>Number of nodes : 1101493</li>
+</ul>
+<ul>
+<li><p class="first">Number of ways : 161846</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre><span class="n">pipeline</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;$match&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&quot;type&quot;</span> <span class="p">:</span> <span class="s">&quot;way&quot;</span><span class="p">}},</span>
+            <span class="p">{</span><span class="s">&quot;$group&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&quot;_id&quot;</span> <span class="p">:</span> <span class="s">&quot;null&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;count&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&quot;$sum&quot;</span> <span class="p">:</span> <span class="mi">1</span> <span class="p">}}},</span>
+            <span class="p">{</span><span class="s">&quot;$limit&quot;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">}]</span>
+
+<span class="n">db</span><span class="o">.</span><span class="n">kyiv_map</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+<ul>
+<li><p class="first">List of available amenities:</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre><span class="n">pipeline</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;$match&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&quot;amenity&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&quot;$exists&quot;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
+                <span class="p">{</span><span class="s">&quot;$group&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&quot;_id&quot;</span> <span class="p">:</span> <span class="s">&quot;$amenity&quot;</span><span class="p">}},</span>
+                <span class="p">{</span><span class="s">&quot;$sort&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&quot;_id&quot;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">}},</span>
+                <span class="p">]</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">aggregate</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">)</span>
+<span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s">&quot;_id&quot;</span><span class="p">])</span>
+<span class="k">print</span> <span class="n">l</span>
+
+<span class="p">[</span><span class="s">u&#39;agency&#39;</span><span class="p">,</span> <span class="s">u&#39;arts_centre&#39;</span><span class="p">,</span> <span class="s">u&#39;atm&#39;</span><span class="p">,</span> <span class="s">u&#39;bank&#39;</span><span class="p">,</span> <span class="s">u&#39;bar&#39;</span><span class="p">,</span> <span class="s">u&#39;bbq&#39;</span><span class="p">,</span> <span class="s">u&#39;beauty&#39;</span><span class="p">,</span> <span class="s">u&#39;bench&#39;</span><span class="p">,</span> <span class="s">u&#39;bicycle_parking&#39;</span><span class="p">,</span> <span class="s">u&#39;bicycle_rental&#39;</span><span class="p">,</span>
+<span class="s">u&#39;biergarten&#39;</span><span class="p">,</span> <span class="s">u&#39;boat_rental&#39;</span><span class="p">,</span> <span class="s">u&#39;bookmaker&#39;</span><span class="p">,</span> <span class="s">u&#39;bureau_de_change&#39;</span><span class="p">,</span> <span class="s">u&#39;bus_station&#39;</span><span class="p">,</span> <span class="s">u&#39;cafe&#39;</span><span class="p">,</span> <span class="s">u&#39;canteen&#39;</span><span class="p">,</span> <span class="s">u&#39;car_rental&#39;</span><span class="p">,</span>
+<span class="s">u&#39;car_sharing&#39;</span><span class="p">,</span> <span class="s">u&#39;car_wash&#39;</span><span class="p">,</span> <span class="s">u&#39;casino&#39;</span><span class="p">,</span> <span class="s">u&#39;chemist&#39;</span><span class="p">,</span> <span class="s">u&#39;cinema&#39;</span><span class="p">,</span> <span class="s">u&#39;clinic&#39;</span><span class="p">,</span> <span class="s">u&#39;clock&#39;</span><span class="p">,</span> <span class="s">u&#39;club&#39;</span><span class="p">,</span> <span class="s">u&#39;college&#39;</span><span class="p">,</span> <span class="s">u&#39;community_center&#39;</span><span class="p">,</span>
+<span class="s">u&#39;community_centre&#39;</span><span class="p">,</span> <span class="s">u&#39;construction&#39;</span><span class="p">,</span> <span class="s">u&#39;courthouse&#39;</span><span class="p">,</span> <span class="s">u&#39;coworking_space&#39;</span><span class="p">,</span> <span class="s">u&#39;crematorium&#39;</span><span class="p">,</span> <span class="s">u&#39;dentist&#39;</span><span class="p">,</span> <span class="s">u&#39;dispancery&#39;</span><span class="p">,</span> <span class="s">u&#39;doctors&#39;</span><span class="p">,</span>
+<span class="s">u&#39;dormitory&#39;</span><span class="p">,</span> <span class="s">u&#39;drinking_water&#39;</span><span class="p">,</span> <span class="s">u&#39;driving_school&#39;</span><span class="p">,</span> <span class="s">u&#39;education&#39;</span><span class="p">,</span> <span class="s">u&#39;educational&#39;</span><span class="p">,</span> <span class="s">u&#39;educational_institute&#39;</span><span class="p">,</span> <span class="s">u&#39;embassy&#39;</span><span class="p">,</span> <span class="s">u&#39;emergency_phone&#39;</span><span class="p">,</span>
+<span class="s">u&#39;emergency_service&#39;</span><span class="p">,</span> <span class="s">u&#39;exhibition_center&#39;</span><span class="p">,</span> <span class="s">u&#39;exhibition_hall&#39;</span><span class="p">,</span> <span class="s">u&#39;fast_food&#39;</span><span class="p">,</span> <span class="s">u&#39;ferry_terminal&#39;</span><span class="p">,</span> <span class="s">u&#39;fire_station&#39;</span><span class="p">,</span> <span class="s">u&#39;fitness_center&#39;</span><span class="p">,</span>
+<span class="s">u&#39;food_court&#39;</span><span class="p">,</span> <span class="s">u&#39;fountain&#39;</span><span class="p">,</span> <span class="s">u&#39;fuel&#39;</span><span class="p">,</span> <span class="s">u&#39;government&#39;</span><span class="p">,</span> <span class="s">u&#39;grave_yard&#39;</span><span class="p">,</span> <span class="s">u&#39;grocery&#39;</span><span class="p">,</span> <span class="s">u&#39;gym&#39;</span><span class="p">,</span> <span class="s">u&#39;hospital&#39;</span><span class="p">,</span> <span class="s">u&#39;ice_rink&#39;</span><span class="p">,</span> <span class="s">u&#39;internet_access&#39;</span><span class="p">,</span>
+<span class="s">u&#39;internet_cafe&#39;</span><span class="p">,</span> <span class="s">u&#39;kindergarten&#39;</span><span class="p">,</span> <span class="s">u&#39;kiosk&#39;</span><span class="p">,</span> <span class="s">u&#39;kitchen&#39;</span><span class="p">,</span> <span class="s">u&#39;library&#39;</span><span class="p">,</span> <span class="s">u&#39;lottery&#39;</span><span class="p">,</span> <span class="s">u&#39;marketplace&#39;</span><span class="p">,</span> <span class="s">u&#39;medical&#39;</span><span class="p">,</span> <span class="s">u&#39;monastery&#39;</span><span class="p">,</span> <span class="s">u&#39;nightclub&#39;</span><span class="p">,</span>
+<span class="s">u&#39;nursing_home&#39;</span><span class="p">,</span> <span class="s">u&#39;office&#39;</span><span class="p">,</span> <span class="s">u&#39;parking&#39;</span><span class="p">,</span> <span class="s">u&#39;parking_entrance&#39;</span><span class="p">,</span> <span class="s">u&#39;parking_space&#39;</span><span class="p">,</span> <span class="s">u&#39;pawnbrocker&#39;</span><span class="p">,</span> <span class="s">u&#39;payment_terminal&#39;</span><span class="p">,</span> <span class="s">u&#39;pet&#39;</span><span class="p">,</span> <span class="s">u&#39;pharmacy&#39;</span><span class="p">,</span>
+<span class="s">u&#39;place_of_worship&#39;</span><span class="p">,</span> <span class="s">u&#39;playground&#39;</span><span class="p">,</span> <span class="s">u&#39;police&#39;</span><span class="p">,</span> <span class="s">u&#39;post_box&#39;</span><span class="p">,</span> <span class="s">u&#39;post_office&#39;</span><span class="p">,</span> <span class="s">u&#39;post_office;bank;atm&#39;</span><span class="p">,</span> <span class="s">u&#39;pub&#39;</span><span class="p">,</span> <span class="s">u&#39;public_building&#39;</span><span class="p">,</span> <span class="s">u&#39;recycling&#39;</span><span class="p">,</span>
+<span class="s">u&#39;register_office&#39;</span><span class="p">,</span> <span class="s">u&#39;rescue_station&#39;</span><span class="p">,</span> <span class="s">u&#39;restaurant&#39;</span><span class="p">,</span> <span class="s">u&#39;retirement_home&#39;</span><span class="p">,</span> <span class="s">u&#39;sanatorium&#39;</span><span class="p">,</span> <span class="s">u&#39;sauna&#39;</span><span class="p">,</span> <span class="s">u&#39;school&#39;</span><span class="p">,</span> <span class="s">u&#39;shelter&#39;</span><span class="p">,</span> <span class="s">u&#39;shop&#39;</span><span class="p">,</span> <span class="s">u&#39;ski_rental&#39;</span><span class="p">,</span>
+<span class="s">u&#39;social_facility&#39;</span><span class="p">,</span> <span class="s">u&#39;stripclub&#39;</span><span class="p">,</span> <span class="s">u&#39;studio&#39;</span><span class="p">,</span> <span class="s">u&#39;substation&#39;</span><span class="p">,</span> <span class="s">u&#39;swimming_pool&#39;</span><span class="p">,</span> <span class="s">u&#39;taxi&#39;</span><span class="p">,</span> <span class="s">u&#39;telephone&#39;</span><span class="p">,</span> <span class="s">u&#39;theatre&#39;</span><span class="p">,</span> <span class="s">u&#39;thermometer&#39;</span><span class="p">,</span> <span class="s">u&#39;toilets&#39;</span><span class="p">,</span>
+<span class="s">u&#39;tourism&#39;</span><span class="p">,</span> <span class="s">u&#39;townhall&#39;</span><span class="p">,</span> <span class="s">u&#39;translation&#39;</span><span class="p">,</span> <span class="s">u&#39;university&#39;</span><span class="p">,</span> <span class="s">u&#39;vehicle_inspection&#39;</span><span class="p">,</span> <span class="s">u&#39;vehicle_ramp&#39;</span><span class="p">,</span> <span class="s">u&#39;vending_machine&#39;</span><span class="p">,</span> <span class="s">u&#39;veterinary&#39;</span><span class="p">,</span>
+<span class="s">u&#39;waste_basket&#39;</span><span class="p">,</span> <span class="s">u&#39;waste_disposal&#39;</span><span class="p">,</span> <span class="s">u&#39;wedding&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p class="first">Number of unique banks : 246</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre><span class="n">pipeline</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&quot;$match&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&quot;amenity&quot;</span> <span class="p">:</span> <span class="s">&quot;bank&quot;</span><span class="p">}},</span>
+    <span class="p">{</span><span class="s">&quot;$group&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&quot;_id&quot;</span> <span class="p">:</span> <span class="s">&quot;$name&quot;</span><span class="p">}},</span>
+    <span class="p">{</span><span class="s">&quot;$group&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&quot;_id&quot;</span> <span class="p">:</span> <span class="s">&quot;null&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;count&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&quot;$sum&quot;</span> <span class="p">:</span> <span class="mi">1</span> <span class="p">}}},</span>
+    <span class="p">]</span>
+<span class="n">db</span><span class="o">.</span><span class="n">kyiv_map</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="audit.html">Problems encountered in the map</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="ideas.html">Other ideas about the datasets</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Sergii Bondariev.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

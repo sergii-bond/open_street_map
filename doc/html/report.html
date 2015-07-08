@@ -1,0 +1,476 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Analysis and results &mdash; Open Street Map Project</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Open Street Map Project" href="index.html" />
+    <link rel="next" title="References" href="references.html" />
+    <link rel="prev" title="Contents" href="index.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>Open Street Map Project</span></a></h1>
+        <h2 class="heading"><span>Analysis and results</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="references.html">References</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="analysis-and-results">
+<h1>Analysis and results<a class="headerlink" href="#analysis-and-results" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="problems-encountered-in-the-map">
+<h2>Problems encountered in the map<a class="headerlink" href="#problems-encountered-in-the-map" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="audit">
+<h3>Audit<a class="headerlink" href="#audit" title="Permalink to this headline">¶</a></h3>
+<p>First we examine the existing tags and their quantity. For this purpose, <em>mapparser.py</em> code was written. Its output is below.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&#39;bounds&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="s">&#39;member&#39;</span><span class="p">:</span> <span class="mi">66249</span><span class="p">,</span>
+<span class="s">&#39;nd&#39;</span><span class="p">:</span> <span class="mi">1349977</span><span class="p">,</span>
+<span class="s">&#39;node&#39;</span><span class="p">:</span> <span class="mi">1101522</span><span class="p">,</span>
+<span class="s">&#39;osm&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="s">&#39;relation&#39;</span><span class="p">:</span> <span class="mi">5432</span><span class="p">,</span>
+<span class="s">&#39;tag&#39;</span><span class="p">:</span> <span class="mi">448567</span><span class="p">,</span>
+<span class="s">&#39;way&#39;</span><span class="p">:</span> <span class="mi">161984</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>From this output we see that no unusual nodes are present. There is more than 1 million nodes in the map. However fewer than a half is tagged.
+There are around 5000 relations, but In this project we ignore them.</p>
+<p>Next we want to evaluate the keys of all <em>tag</em> elements inside <em>node</em> or <em>way</em>.
+In the beginning we just take a look at all tag&#8217;s keys to get a feeling of what to expect further.
+In order to implement this, the dictionary is used, where the key is a <em>tag key</em> and a value is the number of its occurences.
+The dictionary is output to a text file for visual inspection. Here is an example of a resulting file contents:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">CEMT   32</span>
+<span class="go">ISO3166-1   2</span>
+<span class="go">ISO3166-1:alpha2   2</span>
+<span class="go">ISO3166-1:alpha3   2</span>
+<span class="go">ISO3166-1:numeric   2</span>
+<span class="go">ISO3166-2   3</span>
+<span class="go">_description_   275</span>
+<span class="go">abandoned   38</span>
+<span class="go">abandoned:amenity   12</span>
+<span class="go">abandoned:building   2</span>
+<span class="go">abandoned:highway   2</span>
+<span class="go">...</span>
+</pre></div>
+</div>
+<p>Seeing the list of keys we have, the good idea would be to categorize the keys by patterns.
+Here is a list of regexes so far constructed that we can run our keys through:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#Keys that contain letters or undersore only</span>
+<span class="n">lower</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^([a-z]|_)*$&#39;</span><span class="p">)</span>
+<span class="c">#Keys that consist of two words separated by one semicolon</span>
+<span class="n">lower_1_colon</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^([a-z]|_)*:([a-z]|_)*$&#39;</span><span class="p">)</span>
+<span class="c">#Keys that consist of three words separated by two semicolons</span>
+<span class="n">lower_2_colon</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^([a-z]|_)*:([a-z]|_)*:([a-z]|_)*$&#39;</span><span class="p">)</span>
+<span class="c">#Keys that have at least one character that may designate there is a problem with this key</span>
+<span class="n">problemchars</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;[=\+/&amp;&lt;&gt;;</span><span class="se">\&#39;</span><span class="s">&quot;\?%#$@\,\. \t\r\n]&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If a key doesn&#8217;t match anything from the list above, it is marked as <em>other</em>.
+We run <em>tags.py</em> and get this output:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&#39;lower&#39;</span><span class="p">:</span> <span class="mi">336401</span><span class="p">,</span>
+ <span class="s">&#39;lower_1_colon&#39;</span><span class="p">:</span> <span class="mi">111698</span><span class="p">,</span>
+ <span class="s">&#39;lower_2_colon&#39;</span><span class="p">:</span> <span class="mi">197</span><span class="p">,</span>
+ <span class="s">&#39;other&#39;</span><span class="p">:</span> <span class="mi">271</span><span class="p">,</span>
+ <span class="s">&#39;problemchars&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Luckily there are no keys with problems. However There are 271 other keys we didn&#8217;t expect. 58 of them are unique. We can take a look at them (<em>tags.py</em> outputs them to a file <em>other_keys</em>).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">CEMT</span>   <span class="mi">17</span>
+<span class="n">ISO3166</span><span class="o">-</span><span class="mi">1</span>   <span class="mi">1</span>
+<span class="n">ISO3166</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">alpha2</span>   <span class="mi">1</span>
+<span class="n">ISO3166</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">alpha3</span>   <span class="mi">1</span>
+<span class="n">ISO3166</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">numeric</span>   <span class="mi">1</span>
+<span class="n">ISO3166</span><span class="o">-</span><span class="mi">2</span>   <span class="mi">2</span>
+<span class="n">addr</span><span class="p">:</span><span class="n">interpolation_1</span>   <span class="mi">2</span>
+<span class="n">addr</span><span class="p">:</span><span class="n">street_1</span>   <span class="mi">2</span>
+<span class="n">amenity_1</span>   <span class="mi">1</span>
+<span class="n">amenity_2</span>   <span class="mi">1</span>
+<span class="n">associatedStreet</span>   <span class="mi">1</span>
+<span class="n">cinema</span><span class="p">:</span><span class="mi">3</span><span class="n">D</span>   <span class="mi">1</span>
+<span class="n">compartment</span><span class="p">:</span><span class="n">NW</span>   <span class="mi">1</span>
+<span class="n">currency</span><span class="p">:</span><span class="n">EUR</span>   <span class="mi">2</span>
+<span class="n">currency</span><span class="p">:</span><span class="n">RUB</span>   <span class="mi">2</span>
+<span class="n">currency</span><span class="p">:</span><span class="n">UAH</span>   <span class="mi">3</span>
+<span class="n">currency</span><span class="p">:</span><span class="n">USD</span>   <span class="mi">2</span>
+<span class="n">destination</span><span class="p">:</span><span class="n">lang</span><span class="p">:</span><span class="n">en</span><span class="p">:</span><span class="n">backward</span>   <span class="mi">1</span>
+<span class="n">destination</span><span class="p">:</span><span class="n">lang</span><span class="p">:</span><span class="n">en</span><span class="p">:</span><span class="n">lanes</span>   <span class="mi">1</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>To process such keys, we add additional regexes:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mixed</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^([a-z]|[A-z]|_|[0-9]|-)*$&#39;</span><span class="p">)</span>
+<span class="n">mixed_1_colon</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^([a-z]|[A-z]|_|[0-9]|-)*:([a-z]|[A-z]|_|[0-9]|-)*$&#39;</span><span class="p">)</span>
+<span class="n">lower_3_colon</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^([a-z]|_)*:([a-z]|_)*:([a-z]|_)*:([a-z]|_)*$&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If we want to know more hints about the particular key, in this case we can use <em>grep</em> utility to learn about its value and its neighborhood.
+For example, to find out more information about &#8216;CEMT&#8217; key, this command can be run:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">grep &#39;CEMT&#39; -A 2 -B 2 kyiv_ukraine.osm</span>
+</pre></div>
+</div>
+<p>One of the outputs is:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">&lt;nd ref=&quot;267301603&quot;/&gt;</span>
+<span class="go">&lt;nd ref=&quot;1381708683&quot;/&gt;</span>
+<span class="go">&lt;tag k=&quot;CEMT&quot; v=&quot;Vb&quot;/&gt;</span>
+<span class="go">&lt;tag k=&quot;boat&quot; v=&quot;yes&quot;/&gt;</span>
+<span class="go">&lt;tag k=&quot;name&quot; v=&quot;Дніпро&quot;/&gt;</span>
+</pre></div>
+</div>
+<p>There is a hint here, &#8220;Дніпро&#8221; is a river. According to Wikipedia, CEMT can stand for <a class="reference external" href="https://en.wikipedia.org/wiki/Classification_of_European_Inland_Waterways">Classification of European Inland Waterways</a>. The value of <em>CEMT</em> key is <em>Vb</em>. From the same page in Wikipedia we see that it designates a type of classification of waterways. As a result, we can consider this key-value part to be valid. At this point no actions on this pair is to be taken, except we can convert CEMT to lower case. Then we can add it to the final database.</p>
+<p>Similarly we can investigate other fields and see whether any kind of transformation is needed.</p>
+<p>Here is a list of suggested transformations:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>CEMT</dt>
+<dd><p class="first last">Convert to <em>cemt</em></p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ISO3166-1</p>
+<blockquote>
+<div><p>The file output by <em>tags.py</em> contains:</p>
+<div class="highlight-html"><div class="highlight"><pre>ISO3166-1   1
+ISO3166-1:alpha2   1
+ISO3166-1:alpha3   1
+ISO3166-1:numeric   1
+</pre></div>
+</div>
+<p>According to the <a class="reference external" href="https://en.wikipedia.org/wiki/ISO_3166-1">Wikipedia page</a>, ISO3166-1 is a standard that governs the country codes for their names.
+<em>alpha2</em> is a two-letter code, <em>alpha3</em> is a three-letter code and <em>numeric</em> is self-explanatory.
+Here is a snippet from our XML document:</p>
+<div class="highlight-html"><div class="highlight"><pre><span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;ISO3166-1:alpha2&quot;</span> <span class="na">v=</span><span class="s">&quot;UA&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;ISO3166-1:alpha3&quot;</span> <span class="na">v=</span><span class="s">&quot;UKR&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;ISO3166-1:numeric&quot;</span> <span class="na">v=</span><span class="s">&quot;804&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+<p>This can be transformed to such schema:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ISO3166</span><span class="o">-</span><span class="mi">1</span> <span class="p">:</span> <span class="p">{</span> <span class="n">alpha2</span> <span class="p">:</span> <span class="s">&quot;UA&quot;</span><span class="p">,</span>
+            <span class="n">alpha3</span> <span class="p">:</span> <span class="s">&quot;UKR&quot;</span><span class="p">,</span>
+            <span class="n">numeric</span> <span class="p">:</span> <span class="mi">804</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>We can also see one entry without a semicolon:</p>
+<div class="highlight-html"><div class="highlight"><pre><span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;ISO3166-1&quot;</span> <span class="na">v=</span><span class="s">&quot;UA&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+<p>In this case we assume the default is <em>alpha2</em>.</p>
+</div></blockquote>
+</li>
+<li><p class="first">abandoned</p>
+<blockquote>
+<div><p>The file output by <em>tags.py</em> contains:</p>
+<div class="highlight-python"><div class="highlight"><pre>abandoned   19
+abandoned:amenity   6
+abandoned:building   1
+abandoned:highway   1
+abandoned:landuse   1
+abandoned:man_made   2
+abandoned:power   1
+abandoned:public_transport   3
+abandoned:railway   3
+</pre></div>
+</div>
+<p>One example is:</p>
+<div class="highlight-html"><div class="highlight"><pre><span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;abandoned:railway&quot;</span> <span class="na">v=</span><span class="s">&quot;platform&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;abandoned:public_transport&quot;</span> <span class="na">v=</span><span class="s">&quot;platform&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+<p>We translate it to the following schema:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">abandoned</span> <span class="p">:</span> <span class="s">&quot;yes&quot;</span>
+<span class="n">railway</span> <span class="p">:</span> <span class="s">&quot;platform&quot;</span>
+<span class="n">public_transport</span> <span class="p">:</span> <span class="s">&quot;platform&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p class="first">addr</p>
+<blockquote>
+<div><p>The file output by <em>tags.py</em> contains:</p>
+<div class="highlight-python"><div class="highlight"><pre>addr:city   9094
+addr:city:en   7
+addr:country   99
+addr:district   1
+addr:flats   989
+addr:floor   8
+addr:housename   4
+addr:housenumber   31559
+addr:interpolation   61
+addr:interpolation_1   2
+addr:office   2
+addr:officenumber   1
+addr:place   2
+addr:postcode   2155
+addr:region   3
+addr:street   14713
+addr:street:en   9
+addr:street_1   2
+addr:suburb   327
+addr:unit   1
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>The keys will be transformed into a schema using this logic: <br></dt>
+<dd><p class="first">Let&#8217;s name key as K and value as V. <br>
+The first level key in the output is &#8220;address&#8221;, its value is a dictionary of key-value pairs, where the keys are defined as: <br>
+If K has two semicolons:</p>
+<blockquote>
+<div><p>Split K string by semicolon into two parts. Let the second part be X.</p>
+<dl class="docutils">
+<dt>If X is &#8220;city&#8221; or &#8220;street&#8221;:</dt>
+<dd><p class="first last">use { X : {&#8220;uk&#8221; : V } }</p>
+</dd>
+<dt>else:</dt>
+<dd><p class="first last">use { X : V }</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="last docutils">
+<dt>else:</dt>
+<dd><p class="first last">Split K string by semicolon into three parts. Let the second part be X and third part be Y. <br>
+use { X : {Y : V} }</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-html"><div class="highlight"><pre><span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;addr:city&quot;</span> <span class="na">v=</span><span class="s">&quot;Київ&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;addr:street&quot;</span> <span class="na">v=</span><span class="s">&quot;Саксаганського вулиця&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;addr:city:en&quot;</span> <span class="na">v=</span><span class="s">&quot;Kiev&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;addr:postcode&quot;</span> <span class="na">v=</span><span class="s">&quot;01033&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;addr:street:en&quot;</span> <span class="na">v=</span><span class="s">&quot;Saksahanskoho&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+<p>Would be translated to:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="s">&quot;address&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;city&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;ua&quot;</span> <span class="p">:</span> <span class="s">&quot;Київ&quot;</span>
+                         <span class="s">&quot;en&quot;</span> <span class="p">:</span> <span class="s">&quot;Kiev&quot;</span> <span class="p">},</span>
+              <span class="s">&quot;street&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;en&quot;</span> <span class="p">:</span> <span class="s">&quot;Saksahanskoho&quot;</span><span class="p">,</span>
+                           <span class="s">&quot;uk&quot;</span> <span class="p">:</span> <span class="s">&quot;Саксаганського вулиця&quot;</span> <span class="p">}</span>
+              <span class="s">&quot;postcode&quot;</span> <span class="p">:</span> <span class="mo">01033</span><span class="p">,</span>
+            <span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p class="first">fuel</p>
+<blockquote>
+<div><p>Existing keys:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fuel</span><span class="p">:</span><span class="n">GTL_diesel</span>   <span class="mi">2</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">HGV_diesel</span>   <span class="mi">4</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">biodiesel</span>   <span class="mi">4</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">biogas</span>   <span class="mi">5</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">cng</span>   <span class="mi">6</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">diesel</span>   <span class="mi">61</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">e10</span>   <span class="mi">2</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">e85</span>   <span class="mi">2</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">electricity</span>   <span class="mi">5</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">lpg</span>   <span class="mi">52</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">octane_100</span>   <span class="mi">11</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">octane_80</span>   <span class="mi">1</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">octane_91</span>   <span class="mi">12</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">octane_92</span>   <span class="mi">33</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">octane_95</span>   <span class="mi">73</span>
+<span class="n">fuel</span><span class="p">:</span><span class="n">octane_98</span>   <span class="mi">30</span>
+</pre></div>
+</div>
+<p>Example:</p>
+<div class="highlight-html"><div class="highlight"><pre><span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;fuel:biodiesel&quot;</span> <span class="na">v=</span><span class="s">&quot;no&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;fuel:octane_91&quot;</span> <span class="na">v=</span><span class="s">&quot;yes&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;fuel:octane_95&quot;</span> <span class="na">v=</span><span class="s">&quot;yes&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;fuel:octane_98&quot;</span> <span class="na">v=</span><span class="s">&quot;no&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;fuel:GTL_diesel&quot;</span> <span class="na">v=</span><span class="s">&quot;no&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;fuel:HGV_diesel&quot;</span> <span class="na">v=</span><span class="s">&quot;no&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;fuel:octane_100&quot;</span> <span class="na">v=</span><span class="s">&quot;yes&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;fuel:electricity&quot;</span> <span class="na">v=</span><span class="s">&quot;no&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+<p>Apparently it describes the availability of different types of fuel, probably at the gas station. This is European system, therefore we do not see 87, 89 here.
+Instead, types 91, 95, 98, 100 are used.</p>
+<p>We can transform this to the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fuel</span> <span class="p">:</span> <span class="p">{</span> <span class="n">biodiesel</span> <span class="p">:</span> <span class="s">&quot;yes&quot;</span><span class="p">,</span>
+         <span class="n">octane</span> <span class="p">:</span> <span class="p">{</span> <span class="mi">91</span> <span class="p">:</span> <span class="s">&quot;yes&quot;</span><span class="p">,</span>
+                    <span class="mi">95</span> <span class="p">:</span> <span class="s">&quot;yes&quot;</span><span class="p">,</span>
+                    <span class="mi">98</span> <span class="p">:</span> <span class="s">&quot;no&quot;</span><span class="p">,</span>
+                    <span class="mi">100</span> <span class="p">:</span> <span class="s">&quot;yes&quot;</span><span class="p">},</span>
+         <span class="n">diesel</span> <span class="p">:</span> <span class="p">{</span> <span class="n">GTL</span> <span class="p">:</span> <span class="s">&quot;no&quot;</span><span class="p">,</span>
+                    <span class="n">HGV</span> <span class="p">:</span> <span class="s">&quot;no&quot;</span><span class="p">},</span>
+         <span class="n">electricity</span> <span class="p">:</span> <span class="s">&quot;no&quot;</span> <span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p class="first">wikipedia</p>
+<blockquote>
+<div><p>The file output by <em>tags.py</em> contains:</p>
+<div class="highlight-html"><div class="highlight"><pre>wikipedia   705
+wikipedia:en   11
+wikipedia:ru   197
+wikipedia:uk   47
+</pre></div>
+</div>
+<p>We can see two kinds of entries:</p>
+<div class="highlight-html"><div class="highlight"><pre><span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;wikipedia:uk&quot;</span> <span class="na">v=</span><span class="s">&quot;Парк_імені_Пушкіна_(Київ)&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;tag</span> <span class="na">k=</span><span class="s">&quot;wikipedia&quot;</span> <span class="na">v=</span><span class="s">&quot;uk:Астрономічна обсерваторія Київського університету&quot;</span><span class="nt">/&gt;</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Here we can use the following logic:</dt>
+<dd><p class="first last">The first level key is wikipedia. Its value is a dictionary of the following key-value pairs: <br>
+If a key k has one semicolon and word before it is <em>wikipedia</em>, use the second word as a key, take v as a value; <br>
+else, we assume a value v contains a semicolon and use a word before semicolon as a key, and the words after a semicolon as a value.</p>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+</ul>
+<p>Next we audit <em>addr:street</em> and <em>addr:street:en</em> values, that correspond to a native Ukrainian street name and to its English translation.
+The last word in a value is expected to be one of the following, depending on the language:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">expected_en</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Street&quot;</span><span class="p">,</span> <span class="s">&quot;Avenue&quot;</span><span class="p">,</span> <span class="s">&quot;Boulevard&quot;</span><span class="p">,</span> <span class="s">&quot;Drive&quot;</span><span class="p">,</span> <span class="s">&quot;Court&quot;</span><span class="p">,</span> <span class="s">&quot;Place&quot;</span><span class="p">,</span>
+<span class="s">&quot;Square&quot;</span><span class="p">,</span> <span class="s">&quot;Lane&quot;</span><span class="p">,</span> <span class="s">&quot;Road&quot;</span><span class="p">,</span> <span class="s">&quot;Trail&quot;</span><span class="p">,</span> <span class="s">&quot;Parkway&quot;</span><span class="p">,</span> <span class="s">&quot;Commons&quot;</span><span class="p">]</span>
+
+<span class="n">expected_uk</span> <span class="o">=</span> <span class="p">[</span><span class="s">u&quot;шосе&quot;</span><span class="p">,</span> <span class="s">u&quot;шлях&quot;</span><span class="p">,</span> <span class="s">u&quot;узвіз&quot;</span><span class="p">,</span> <span class="s">u&quot;тупик&quot;</span><span class="p">,</span> <span class="s">u&quot;проїзд&quot;</span><span class="p">,</span>
+<span class="s">u&quot;проспект&quot;</span><span class="p">,</span> <span class="s">u&quot;провулок&quot;</span><span class="p">,</span> <span class="s">u&quot;площа&quot;</span><span class="p">,</span> <span class="s">u&quot;набережна&quot;</span><span class="p">,</span> <span class="s">u&quot;дорога&quot;</span><span class="p">,</span> <span class="s">u&quot;вулиця&quot;</span><span class="p">,</span> <span class="s">u&quot;бульвар&quot;</span><span class="p">,</span> <span class="s">u&quot;алея&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>In order to let Python know we use Unicode in string literals, we need to
+insert this in the top of the source code:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># -*- coding: utf-8 -*-</span>
+</pre></div>
+</div>
+<p>Also, when using regular expressions, re.UNICODE flag must be used:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">street_type_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;\b\S+\.?$&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>File <em>audit.py</em> prints the values which do not fullfill expectations:</p>
+<div class="highlight-python"><div class="highlight"><pre>{8: set([Срибнокильская, 8]),
+&#39;Dragomanova&#39;: set([&#39;Dragomanova&#39;]),
+&#39;Revutskogo&#39;: set([&#39;Revutskogo&#39;]),
+&#39;Saksahanskoho&#39;: set([&#39;Saksahanskoho&#39;]),
+&#39;str.&#39;: set([&#39;Sortuvalna str.&#39;]),
+Бучми: set([Бучми]),
+Васильковская: set([Большая Васильковская]),
+Декабристів: set([Декабристів]),
+Леніна: set([Леніна]),
+Лучистая: set([Лучистая]),
+Малышко: set([вул. Андрея Малышко]),
+Микільсько-Слобідська: set([вул. Микільсько-Слобідська]),
+Набережная: set([Набережная]),
+Олійника: set([Олійника]),
+Орача: set([Червоного Орача]),
+Осенняя: set([Осенняя]),
+Перемоги: set([проспект Перемоги]),
+Петлюри: set([С. Петлюри]),
+Сагайдачного: set([вул. Сагайдачного]),
+Сковороди: set([вул. Григорія Сковороди]),
+Сталинграда: set([проспект Героев Сталинграда]),
+Чернобыльская: set([Чернобыльская]),
+Чехова: set([Чехова]),
+Электротехническая: set([Электротехническая]),
+набережная: set([Днепровская набережная]),
+народів: set([Площа Дружби народів]),
+улица: set([Автодорожная улица, Приречная улица])}
+</pre></div>
+</div>
+<p>There are several things we can see from this list:</p>
+<ul class="simple">
+<li>Some streets do not have type</li>
+<li>One street includes a house number instead of a type</li>
+<li>One street is in English, while belongs to a field <em>addr:street</em>, not <em>addr:street:en</em> (it was later found by <em>grep</em>)</li>
+<li>One of the street has type <em>улица</em>, which is a Russian word, not Ukrainian (it would be <em>вулиця</em>)</li>
+<li>Several street names have type <em>вул.</em>, which is an abbreviation of <em>вулиця</em>, and it is found in the beginning of a string, not in the end as expected</li>
+</ul>
+<p>In the code we will handle the last case and replace  <em>вул.</em> by <em>вулиця</em> and put it at the end of the string.
+To do this, we create a mapping and a function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mapping_uk</span> <span class="o">=</span> <span class="p">{</span> <span class="s">u&#39;вул.&#39;</span> <span class="p">:</span> <span class="s">u&#39;вулиця&#39;</span> <span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">update_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">mapping</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Fixes the street names.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">mapping_uk</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="n">street_type_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">street_type_re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">val</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">name</span>
+</pre></div>
+</div>
+<p>As the result, the fixed street names are:</p>
+<div class="highlight-python"><div class="highlight"><pre>вул. Микільсько-Слобідська =&gt;  Микільсько-Слобідська вулиця
+вул. Сагайдачного =&gt;  Сагайдачного вулиця
+вул. Григорія Сковороди =&gt;  Григорія Сковороди вулиця
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="overview-of-the-data">
+<h2>Overview of the Data<a class="headerlink" href="#overview-of-the-data" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="other-ideas-about-the-datasets">
+<h2>Other ideas about the datasets<a class="headerlink" href="#other-ideas-about-the-datasets" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Find more details about <em>addr:interpolation</em> field <a class="reference external" href="http://wiki.openstreetmap.org/wiki/Addresses#Using_interpolation">here</a>.
+See how <em>addr:interpolation_1</em>  can interpreted.</li>
+<li>Understand what does <em>addr:street_1</em> designates</li>
+</ul>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="references.html">References</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Sergii Bondariev.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
